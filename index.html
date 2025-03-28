@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Ping Monitor</title>
+</head>
+<body>
+    <h1>IP Ping Monitor</h1>
+    <p>Status: <span id="status">Waiting for updates...</span></p>
+
+    <script>
+        const SERVER_URL = "http://122.166.241.93:3000/events"; // Replace with backend IP
+
+        const eventSource = new EventSource(SERVER_URL);
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log("Ping Update:", data.result);
+
+            if (data.result.includes("Request timed out") || data.result.includes("unreachable")) {
+                document.getElementById("status").innerText = "🔴 Offline";
+            } else if (data.result.includes("bytes from") || data.result.includes("Reply from")) {
+                document.getElementById("status").innerText = "🟢 Online";
+            }
+        };
+
+        eventSource.onerror = function() {
+            document.getElementById("status").innerText = "⚠️ Connection lost";
+        };
+    </script>
+</body>
+</html>
